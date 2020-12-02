@@ -1,0 +1,44 @@
+{
+  "name": "banda-chat",
+  "version": "1.0.0",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "node build/app.js"
+  },
+  "dependencies": {
+    "@hapi/joi": "17.1.0",
+    "@types/express": "^4.17.5",
+    "@types/mongoose": "^5.7.9",
+    "@types/node": "^13.11.1",
+    "@typescript-eslint/eslint-plugin": "^2.27.0",
+    "@typescript-eslint/parser": "^2.27.0",
+    "body-parser": "1.18.2",
+    "commitizen": "^4.0.3",
+    "compression": "1.7.1",
+    "cookie-parser": "1.4.3",
+    "cors": "2.8.5",
+    "eslint-config-airbnb": "^18.0.1",
+    "eslint-import-resolver-typescript": "^2.0.0",
+    "eslint-plugin-json": "^2.1.1",
+    "express": "4.16.2",
+    "helmet": "3.9.0",
+    "http": "0.0.1-security",
+    "mongoose": "5.7.5"
+  },
+  "devDependencies": {
+    "cz-conventional-changelog": "3.1.0",
+    "eslint": "^6.8.0",
+    "eslint-config-airbnb-base": "14.0.0",
+    "eslint-config-prettier": "6.10.0",
+    "eslint-plugin-import": "^2.20.1",
+    "eslint-plugin-node": "11.0.0",
+    "eslint-plugin-prettier": "3.1.2",
+    "typescript": "^3.8.3"
+  },
+  "config": {
+    "commitizen": {
+      "path": "./node_modules/cz-conventional-changelog"
+    }
+  }
+}

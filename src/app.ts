@@ -2,6 +2,7 @@ import * as http from 'http';
 import * as express from 'express';
 import Router from './controllers/users/router';
 import Middleware from './middleware/middleware';
+import ErrorHandler from './error/errorHandler';
 
 
 class Server {
@@ -11,6 +12,7 @@ class Server {
     const app: express.Application = express();
     Middleware.init(app);
     Router.init(app);
+    ErrorHandler.init(app);
     app.set('port', process.env.PORT || 3000);
     this.app = app;
   }

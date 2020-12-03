@@ -1,5 +1,5 @@
 import { Schema, Model } from 'mongoose';
-import { connection } from '../connection';
+import { connection } from './connection';
 import IUsers from '../interfaces/users.interface';
 
 class UserModel {

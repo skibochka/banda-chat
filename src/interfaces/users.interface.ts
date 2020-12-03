@@ -1,7 +1,7 @@
 /* eslint-disable semi */
 import { Document } from 'mongoose';
 
-export default interface usersSchema extends Document {
+export default interface IUser extends Document {
     login?: string;
     password?: string;
 }

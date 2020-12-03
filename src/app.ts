@@ -1,7 +1,7 @@
 import * as http from 'http';
 import * as express from 'express';
-import Router from './controllers/router';
-import Middleware from './middleware';
+import Router from './controllers/users/router';
+import Middleware from './middleware/middleware';
 
 
 class Server {

@@ -1,8 +1,9 @@
 import * as http from 'http';
 import * as express from 'express';
-import Router from './controllers/users/router';
-import Middleware from './middleware/middleware';
-import ErrorHandler from './error/errorHandler';
+import UsersRouter from './controllers/users/router';
+import AuthRouter from './controllers/auth/router';
+import Utils from './utils/utils.config';
+import ErrorHandler from './middleware/errorHandler';
 
 
 class Server {
@@ -10,8 +11,11 @@ class Server {
 
   constructor() {
     const app: express.Application = express();
-    Middleware.init(app);
-    Router.init(app);
+    Utils.init(app);
+
+    AuthRouter.init(app);
+    UsersRouter.init(app);
+
     ErrorHandler.init(app);
     app.set('port', process.env.PORT || 3000);
     this.app = app;

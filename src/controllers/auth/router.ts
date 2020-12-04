@@ -15,24 +15,24 @@ class Router extends BaseRouter {
     super();
     const router: ERouter = ERouter();
     /**
-       * Route serving all users.
-       * @name /users
+       * Route for signing in
+       * @name /auth/sign-in
        * @function
        * @inner
        * @param {string} path - Express path
        * @param {callback} middleware - Express middleware.
        */
-    router.get('/users', this.asyncWrapper(Users.getAll));
+    router.post('/auth/sign-in', this.asyncWrapper(Users.signin));
 
     /**
-       * Route that creates a user.
-       * @name /users/create
+       * Route for signing up
+       * @name /auth/sign-up
        * @function
        * @inner
        * @param {string} path - Express path
        * @param {callback} middleware - Express middleware.
        */
-    router.post('/users/create', this.asyncWrapper(Users.create));
+    router.post('/auth/sign-up', this.asyncWrapper(Users.signup));
 
     this.router = router;
   }

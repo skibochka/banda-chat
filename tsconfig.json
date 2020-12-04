@@ -1,10 +1,14 @@
 {
     "compilerOptions": {
       "outDir": "./build/",
+      "lib": ["es6", "dom"],
+      "types": ["reflect-metadata"],
+      "moduleResolution": "node",
       "module": "commonjs",
       "target": "es2017",
       "allowJs": true,
       "experimentalDecorators": true,
+      "emitDecoratorMetadata": true,
       "removeComments": true,
       "sourceMap": false,
       "resolveJsonModule": true,

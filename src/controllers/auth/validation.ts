@@ -1,7 +1,7 @@
 import * as Joi from '@hapi/joi';
 
 class UsersValidation {
-  public createUser(data) {
+  public checkUser(data) {
     return Joi
       .object({
         login: Joi

@@ -1,6 +1,6 @@
 import { Schema, Model } from 'mongoose';
 import { connection } from './connection';
-import IUsers from '../interfaces/users.interface';
+import User from '../interfaces/users.interface';
 
 class UserModel {
   UsersSchema(): Schema {
@@ -22,7 +22,7 @@ class UserModel {
     );
   }
 
-  get(): Model<IUsers> {
+  get(): Model<User> {
     return connection.model('users', this.UsersSchema());
   }
 }

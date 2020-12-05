@@ -1,8 +1,10 @@
 import * as bcrypt from 'bcrypt';
-import Users from '../models/users';
-import IUsers from '../interfaces/users.interface';
+import { injectable } from 'inversify';
+import Users from '../models/user';
+import IUsers from '../interfaces/user.interface';
 
-class UsersServices {
+@injectable()
+export class UserService {
   /**
    * @method getAll
    * @returns {Promise<IUsers[]>} list of users
@@ -31,5 +33,3 @@ class UsersServices {
     return Users.create(creds);
   }
 }
-
-export default new UsersServices();

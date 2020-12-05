@@ -1,7 +1,9 @@
 import * as Joi from '@hapi/joi';
+import { injectable } from 'inversify';
 
-class UsersValidation {
-  public createUser(data) {
+@injectable()
+export class UserValidation {
+  public checkUser(data) {
     return Joi
       .object({
         login: Joi
@@ -14,5 +16,3 @@ class UsersValidation {
       .validate(data);
   }
 }
-
-export default new UsersValidation();

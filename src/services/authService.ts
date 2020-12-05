@@ -1,18 +1,23 @@
 import * as jwtService from 'jsonwebtoken';
 import * as dotenv from 'dotenv';
 import * as bcrypt from 'bcrypt';
+import { inject, injectable } from 'inversify';
 import authConstants from '../constants/constants';
 import redisConnection from '../utils/redisConnection';
-import { IUser } from '../interfaces/users.interface';
-import usersService from './usersService';
+import { IUser } from '../interfaces/user.interface';
+import { UserService } from './userService';
+import TYPES from '../constants/types';
 
 dotenv.config();
 
-class Authorization {
+@injectable()
+export class AuthService {
+  @inject(TYPES.UserService) private userService: UserService;
+
   private redisClient = redisConnection;
 
   public async verifyUser(cred: IUser) {
-    const user = await usersService.getOne(cred.login);
+    const user = await this.userService.getOne(cred.login);
     const passwordCompared = await bcrypt.compare(cred.password, user.password);
 
     if (passwordCompared) {
@@ -76,5 +81,3 @@ class Authorization {
     return this.redisClient.get(token);
   }
 }
-
-export default new Authorization();

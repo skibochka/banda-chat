@@ -1,30 +1,42 @@
-import UsersServices from '../../services/usersService';
-import UsersValidation from './validation';
+import { inject } from 'inversify';
+import { controller, httpPost, BaseHttpController } from 'inversify-express-utils';
 import ValidationError from '../../middleware/ValidationError';
-import authService from '../../services/authService';
-import { IUser } from '../../interfaces/users.interface';
+import TYPES from '../../constants/types';
+import { UserService } from '../../services/userService';
+import { UserValidation } from '../users/validation';
+import { AuthService } from '../../services/authService';
+import { IUser } from '../../interfaces/user.interface';
 
-class Auth {
+@controller('/auth')
+class AuthController extends BaseHttpController {
+  @inject(TYPES.UserService) private userServices: UserService;
+
+  @inject(TYPES.AuthService) private authService: AuthService;
+
+  @inject(TYPES.UserValidation) private userValidation: UserValidation;
+
+  @httpPost('/sign-in')
   public async signin(req, res): Promise<Express.Response> {
-    const { error } = UsersValidation.checkUser(req.body);
+    const { error } = this.userValidation.checkUser(req.body);
 
     if (error) throw new ValidationError(error.details);
 
-    const user = await authService.verifyUser(req.body);
+    const user = await this.authService.verifyUser(req.body);
     if (!user) {
       throw new Error('User not found');
     }
-    const tokens = await authService.login(user);
+    const tokens = await this.authService.login(user);
 
     return res.status(200).send(tokens);
   }
 
+  @httpPost('/sign-up')
   public async signup(req, res): Promise<Express.Response> {
-    const { error } = UsersValidation.checkUser(req.body);
+    const { error } = this.userValidation.checkUser(req.body);
 
     if (error) throw new ValidationError(error.details);
 
-    const user: IUser = await UsersServices.create(req.body);
+    const user: IUser = await this.userServices.create(req.body);
 
     return res.status(200).send({
       user,
@@ -32,4 +44,4 @@ class Auth {
   }
 }
 
-export default new Auth();
+export default AuthController;

@@ -2,7 +2,7 @@
  * @exports
  * @extends Error
  */
-class ValidationError extends Error {
+export class ValidationError extends Error {
   /**
    * @constructor
    * @param {object} message

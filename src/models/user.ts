@@ -1,6 +1,6 @@
 import { Schema, Model } from 'mongoose';
 import { connection } from './connection';
-import User from '../interfaces/users.interface';
+import User from '../interfaces/user.interface';
 
 class UserModel {
   UsersSchema(): Schema {

@@ -4,6 +4,9 @@ import * as cookieParser from 'cookie-parser';
 import * as cors from 'cors';
 import * as helmet from 'helmet';
 import * as express from 'express';
+import { config } from 'dotenv';
+
+config();
 
 class Config {
   public init(app: express.Application): void {

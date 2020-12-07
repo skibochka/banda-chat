@@ -8,6 +8,7 @@ import ErrorHandler from '../middleware/errorHandler';
 import { UserService } from '../services/userService';
 import { AuthService } from '../services/authService';
 import { UserValidation } from '../controllers/users/validation';
+import { AuthProvider } from '../controllers/auth/provider';
 
 class InversifyApp {
   private server: InversifyExpressServer;
@@ -19,7 +20,7 @@ class InversifyApp {
     container.bind<AuthService>(TYPES.AuthService).to(AuthService);
     container.bind<UserValidation>(TYPES.UserValidation).to(UserValidation);
 
-    this.server = new InversifyExpressServer(container);
+    this.server = new InversifyExpressServer(container, null, null, null, AuthProvider);
   }
 
   public init() {

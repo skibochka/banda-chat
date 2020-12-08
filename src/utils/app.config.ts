@@ -13,6 +13,10 @@ class Config {
     app.use(compression());
     app.use(helmet());
     app.use(cors());
+    app.get('/', (req, res) => {
+      res.sendFile(`${__dirname}/index.html`);
+    });
+    console.log(__dirname);
     app.set('port', process.env.PORT || 3000);
   }
 }

@@ -16,7 +16,7 @@ class AuthController extends BaseHttpController {
   @inject(TYPES.UserValidation) private userValidation: UserValidation;
 
   @httpPost('/sign-in')
-  public async signin(req, res): Promise<Express.Response> {
+  public async signIn(req, res): Promise<Express.Response> {
     const { error } = this.userValidation.checkUser(req.body);
 
     if (error) throw new ValidationError(error.details);

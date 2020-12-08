@@ -19,31 +19,31 @@ class AuthController extends BaseHttpController {
   @inject(TYPES.UserValidation) private userValidation: UserValidation;
 
   @httpPost('/sign-in')
-  public async signIn(req, res): Promise<Express.Response> {
-    const { error } = this.userValidation.checkUser(req.body);
+  public async signIn(): Promise<Express.Response> {
+    const { error } = this.userValidation.checkUser(this.httpContext.request.body);
 
     if (error) throw new ValidationError(error.details);
 
-    const user = await this.authService.verifyUser(req.body);
+    const user = await this.authService.verifyUser(this.httpContext.request.body);
     if (!user) {
       throw new AuthenticationError('User not found');
     }
     const tokens = await this.authService.login(user);
 
-    return res.status(200).send(tokens);
+    return this.json(tokens, 200);
   }
 
   @httpPost('/sign-up')
-  public async signUp(req, res): Promise<Express.Response> {
-    const { error } = this.userValidation.checkUser(req.body);
+  public async signUp(): Promise<Express.Response> {
+    const { error } = this.userValidation.checkUser(this.httpContext.request.body);
 
     if (error) throw new ValidationError(error.details);
 
-    const user: IUser = await this.userServices.create(req.body);
+    const user: IUser = await this.userServices.create(this.httpContext.request.body.body);
 
-    return res.status(200).send({
+    return this.json({
       user,
-    });
+    }, 200);
   }
 
   @httpPost('/refreshToken')
@@ -52,7 +52,6 @@ class AuthController extends BaseHttpController {
       const user = await this.authService.getByToken(req.body.refreshToken);
 
       const oldRefreshToken: string = await this.authService.getRefreshTokenByLogin(user.login);
-
       // if the old refresh token is not equal to request refresh token then this user is unauthorized
       if (!oldRefreshToken || oldRefreshToken !== req.body.refreshToken) {
         throw new Error();
@@ -66,16 +65,16 @@ class AuthController extends BaseHttpController {
   }
 
   @httpGet('/logout')
-  public async logout(req, res): Promise<Express.Response> {
+  public async logout(): Promise<Express.Response> {
     const deletedUserCount = await this.authService.deleteTokenByLogin(this.httpContext.user.details.login);
 
     if (deletedUserCount === 0) {
       throw new AuthenticationError('Token were missing or incorrect');
     }
 
-    return res.status(200).send({
+    return this.json({
       status: 'done',
-    });
+    }, 200);
   }
 }
 

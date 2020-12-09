@@ -20,8 +20,8 @@ class Server {
 
     ioServer.on('connection', async (socket) => {
       const client = await Client.build(socket);
-      client.on('new-message', (roomId, newMessage) => {
-        socket.broadcast.emit(roomId, newMessage);
+      client.on('new-event', (data) => {
+        ioServer.emit(data.event, data.content);
       });
     });
     return serverInstance;

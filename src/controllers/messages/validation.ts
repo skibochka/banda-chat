@@ -13,5 +13,44 @@ class MessageValidation {
       })
       .validate(data);
   }
+
+  public getMessages(data) {
+    return Joi
+      .object({
+        roomId: Joi
+          .string()
+          .required(),
+        limit: Joi
+          .number()
+          .required(),
+        page: Joi
+          .number()
+          .required(),
+      })
+      .validate(data);
+  }
+
+  public updateMessages(data) {
+    return Joi
+      .object({
+        msgId: Joi
+          .string()
+          .required(),
+        content: Joi
+          .string()
+          .required(),
+      })
+      .validate(data);
+  }
+
+  public deleteMessage(data) {
+    return Joi
+      .object({
+        msgId: Joi
+          .string()
+          .required(),
+      })
+      .validate(data);
+  }
 }
 export default new MessageValidation();

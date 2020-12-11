@@ -12,6 +12,53 @@
         body {
             background: #fcfcfc;
         }
+        /* Style the tab */
+        .tab {
+            overflow: hidden;
+            border: 1px solid #ccc;
+            background-color: #f1f1f1;
+        }
+
+        /* Style the buttons inside the tab */
+        .tab button {
+            background-color: inherit;
+            float: left;
+            border: none;
+            outline: none;
+            cursor: pointer;
+            padding: 14px 16px;
+            transition: 0.3s;
+            font-size: 17px;
+        }
+
+        /* Change background color of buttons on hover */
+        .tab button:hover {
+            background-color: #ddd;
+        }
+
+        /* Create an active/current tablink class */
+        .tab button.active {
+            background-color: #ccc;
+        }
+
+        /* Style the tab content */
+        .tabcontent {
+            display: none;
+            padding: 6px 12px;
+            -webkit-animation: fadeEffect 1s;
+            animation: fadeEffect 1s;
+        }
+
+        /* Fade in tabs */
+        @-webkit-keyframes fadeEffect {
+            from {opacity: 0;}
+            to {opacity: 1;}
+        }
+
+        @keyframes fadeEffect {
+            from {opacity: 0;}
+            to {opacity: 1;}
+        }
     </style>
 </head>
 <body>
@@ -20,6 +67,22 @@
     <div class="py-5 text-center">
         <h2>Чат программа</h2>
         <p class="lead">Укажите ваше имя и начинайте переписку</p>
+    </div>
+    <div>
+        <form id="createRoom">
+            <label for="name">Имя комнаты</label>
+            <input type="text" name="name" id="roomName" autocomplete="off" placeholder="Введите название" class="form-control">
+            <br>
+            <input type="submit" value="Создать" class="btn btn-danger">
+        </form>
+    </div>
+    <div>
+        <form id="joinRoom">
+            <label for="name">Имя комнаты</label>
+            <input type="text" name="name" id="joinRoomName" placeholder="Введите название" class="form-control">
+            <br>
+            <input type="submit" value="Join" class="btn btn-danger">
+        </form>
     </div>
     <div class="row">
         <div class="col-6">
@@ -34,11 +97,26 @@
                 <br>
                 <input type="submit" value="Отправить" class="btn btn-danger">
             </form>
+            <form id="messRoom">
+                <input type="submit" value="В комнату" class="btn btn-danger">
+            </form>
         </div>
         <div class="col-6">
             <h3>Сообщения</h3>
-            <!-- Вывод всех сообщений будет здесь -->
-            <div id="all_mess"></div>
+            <div class="tab">
+                <button class="tablinks" onclick="openCity(event, 'allMessages')">All messages</button>
+                <button class="tablinks" onclick="openCity(event, 'roomMessages')">Room</button>
+            </div>
+
+            <div id="allMessages" class="tabcontent">
+                <h3>All messages</h3>
+                <div id="all_mess"></div>
+            </div>
+
+            <div id="roomMessages" class="tabcontent">
+                <h3>Room</h3>
+                <div id="test"></div>
+            </div>
         </div>
     </div>
 </div>
@@ -46,15 +124,34 @@
 <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
 <script src="/socket.io/socket.io.js"></script>
 <script>
+  function openCity(evt, cityName) {
+    var i, tabcontent, tablinks;
+    tabcontent = document.getElementsByClassName("tabcontent");
+    for (i = 0; i < tabcontent.length; i++) {
+      tabcontent[i].style.display = "none";
+    }
+    tablinks = document.getElementsByClassName("tablinks");
+    for (i = 0; i < tablinks.length; i++) {
+      tablinks[i].className = tablinks[i].className.replace(" active", "");
+    }
+    document.getElementById(cityName).style.display = "block";
+    evt.currentTarget.className += " active";
+  }
   // Функция для работы с данными на сайте
   $(function() {
     // Включаем socket.io и отслеживаем все подключения
-    var socket = io.connect();
+    const socket = io.connect();
+    socket.emit('msg.get', { roomId: '1', limit: 5, page: 0 });
+    socket.on('msg.get', (messages) => {
+      messages.forEach((element) => {
+        $all_messages.append("<div class='alert alert-" + 'warning' + "'><b>" + element.sender + "</b>: " + element.content + "</div>");
+      })
+    });
     // Делаем переменные на:
-    var $form = $("#messForm"); // Форму сообщений
-    var $name = $("#name"); // Поле с именем
-    var $textarea = $("#message"); // Текстовое поле
-    var $all_messages = $("#all_mess"); // Блок с сообщениями
+    const $form = $("#messForm"); // Форму сообщений
+    const $name = $("#name"); // Поле с именем
+    const $textarea = $("#message"); // Текстовое поле
+    const $all_messages = $("#all_mess"); // Блок с сообщениями
 
     // Отслеживаем нажатие на кнопку в форме сообщений
     $form.submit(function(event) {
@@ -63,17 +160,73 @@
       // В сокет отсылаем новое событие 'send mess',
       // в событие передаем различные параметры и данные
       socket.emit('msg', { content: $textarea.val(), sender: $name.val() });
+      $all_messages.append("<div class='alert alert-" + 'success' + "'><b>" + $name.val() + "</b>: " + $textarea.val() + "</div>");
       // Очищаем поле с сообщением
       $textarea.val('');
     });
 
-    // Здесь отслеживаем событие 'add mess',
+    // Делаем переменные на:
+    const $messRoom = $("#messRoom"); // Форму сообщений
+    const $RoomName = $("#joinRoomName");
+
+    // Отправка собщений в разные комнаты
+    const $room_messages = $("#test");
+    $messRoom.submit(function(event) {
+      // Предотвращаем классическое поведение формы
+      event.preventDefault();
+      // В сокет отсылаем новое событие 'send mess',
+      // в событие передаем различные параметры и данные
+      socket.emit('room.msg', { content: $textarea.val(), sender: $name.val(), roomName: $RoomName.val() });
+      $room_messages.append("<div class='alert alert-success" + "'><b>" + $name.val() + "</b>: " + $textarea.val() + "</div>");
+      // Очищаем поле с сообщением
+      $textarea.val('');
+    });
+
+    // Делаем переменные на:
+    const $newRoom = $("#createRoom"); // Форму создания комнаты
+    const $roomName = $("#roomName"); // Поле с именем комнаты
+
+    // Отслеживаем нажатие на кнопку в форме создания комнаты
+    $newRoom.submit(function(event) {
+      // Предотвращаем классическое поведение формы
+      event.preventDefault();
+      // В сокет отсылаем новое событие 'room.create',
+      // в событие передаем различные параметры и данные
+      socket.emit('room.create', { roomName: $roomName.val(), members:[$name.val()] });
+      // Очищаем поле названия комнаты
+      $roomName.val('');
+    });
+
+    // Делаем переменные на:
+    const $joinRoom = $("#joinRoom"); // Форму конекта к комнате
+    const $joinRoomName = $("#joinRoomName"); // Поле с именем комнаты
+
+    // Отслеживаем нажатие на кнопку в форме конекта к комнаты
+    $joinRoom.submit(function(event) {
+      // Предотвращаем классическое поведение формы
+      event.preventDefault();
+      // Делаем конект к комнате
+      console.log($joinRoomName.val())
+      socket.emit('room.join', { roomName: $joinRoomName.val()});
+    });
+
+    // Здесь отслеживаем событие 'msg',
     // которое должно приходить из сокета в случае добавления нового сообщения
-    socket.on('msg', function(data) {
+    socket.on('msg', (data) => {
+      console.log(data);
       // Встраиваем полученное сообщение в блок с сообщениями
       // У блока с сообщением будет тот класс, который соответвует пользователю что его отправил
       $all_messages.append("<div class='alert alert-" + 'warning' + "'><b>" + data.sender + "</b>: " + data.content + "</div>");
-    });
+    })
+
+    socket.on('room.msg', (data) => {
+      console.log($room_messages);
+      $room_messages.append("<div class='alert alert-" + 'warning' + "'><b>" + data.sender + "</b>: " + data.content + "</div>");
+    })
+
+    socket.on('room.create', (newRoom) => {
+      socket.emit('room.join', { roomName: newRoom });
+    })
 
   });
 </script>

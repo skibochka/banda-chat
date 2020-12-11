@@ -17,10 +17,9 @@ class MessageService {
   }
 
   public async getMessages(data: IGetMessages) {
-    return Messages.find({ roomId: data.roomId })
-      .skip(data.limit * data.page)
-      .limit(data.limit)
-      .exec();
+    return Messages.find({ })
+      .skip(await Messages.count({}) - data.limit)
+      .limit(data.limit);
   }
 }
 

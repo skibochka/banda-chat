@@ -19,6 +19,7 @@ class Server {
     const ioServer = new io.Server(serverInstance);
 
     ioServer.on('connection', async (socket) => {
+      console.log(`user ${socket.id} is connected`);
       const client = await Client.build(socket);
       client.on('new-event', (data) => {
         ioServer.emit(data.event, data.content);

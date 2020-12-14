@@ -2,7 +2,7 @@
  * @exports
  * @extends Error
  */
-export class AuthenticationError extends Error {
+export default class AuthenticationError extends Error {
   /**
    * @constructor
    * @param {object} message

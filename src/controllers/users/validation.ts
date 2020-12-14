@@ -1,7 +1,5 @@
 import * as Joi from '@hapi/joi';
-import { injectable } from 'inversify';
 
-@injectable()
 export class UserValidation {
   public checkUser(data) {
     return Joi

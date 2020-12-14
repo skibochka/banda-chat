@@ -1,9 +1,7 @@
 import * as bcrypt from 'bcrypt';
-import { injectable } from 'inversify';
 import Users from '../models/user';
 import IUsers from '../interfaces/user.interface';
 
-@injectable()
 export class UserService {
   /**
    * @method getAll

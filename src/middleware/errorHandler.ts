@@ -1,10 +1,11 @@
 import * as express from 'express';
-import { AuthenticationError } from './AuthError';
+import * as jwt from 'jsonwebtoken';
+import AuthenticationError from './AuthError';
 import ValidationError from './ValidationError';
 
 class ErrorHandler {
   public init(app: express.Application) {
-    app.use((error, req, res, next): express.NextFunction => {
+    app.use((error, _req, res, next): express.NextFunction => {
       if (error instanceof ValidationError) {
         res.status(422).json({
           error: error.name,
@@ -12,7 +13,9 @@ class ErrorHandler {
         });
 
         return next(error);
-      } if (error instanceof AuthenticationError) {
+      } if (error instanceof AuthenticationError
+        || error instanceof jwt.TokenExpiredError
+        || error instanceof jwt.JsonWebTokenError) {
         res.status(401).json({
           error: error.name,
           details: error.message,

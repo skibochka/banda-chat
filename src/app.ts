@@ -1,13 +1,24 @@
-import 'reflect-metadata';
 import * as http from 'http';
 import * as express from 'express';
-import InversifyApp from './utils/inversify.config';
+import { config } from 'dotenv';
+import Config from './utils/app.config';
+import AuthRouter from './controllers/auth/router';
+import UserRouter from './controllers/users/router';
+import ErrorHandler from './middleware/errorHandler';
+
+config();
 
 class Server {
   private app: express.Application;
 
   constructor() {
-    this.app = new InversifyApp().init();
+    this.app = express();
+    Config.init(this.app);
+
+    AuthRouter.init(this.app);
+    UserRouter.init(this.app);
+
+    ErrorHandler.init(this.app);
   }
 
   public start(): http.Server {

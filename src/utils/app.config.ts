@@ -1,12 +1,8 @@
 import * as bodyParser from 'body-parser';
 import * as compression from 'compression';
 import * as cookieParser from 'cookie-parser';
-import * as cors from 'cors';
 import * as helmet from 'helmet';
 import * as express from 'express';
-import { config } from 'dotenv';
-
-config();
 
 class Config {
   public init(app: express.Application): void {
@@ -15,7 +11,6 @@ class Config {
     app.use(cookieParser());
     app.use(compression());
     app.use(helmet());
-    app.use(cors());
     app.set('port', process.env.PORT || 3000);
   }
 }

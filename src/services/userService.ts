@@ -1,9 +1,7 @@
 import * as bcrypt from 'bcrypt';
-import { injectable } from 'inversify';
 import Users from '../models/user';
 import { IUser } from '../interfaces/user.interface';
 
-@injectable()
 export class UserService {
   public async getAll(): Promise<IUser[]> {
     return Users.find({});

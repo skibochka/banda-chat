@@ -1,18 +1,14 @@
-import * as jwtService from 'jsonwebtoken';
-import * as dotenv from 'dotenv';
+import * as JwtService from 'jsonwebtoken';
 import * as bcrypt from 'bcrypt';
-import { inject, injectable } from 'inversify';
 import authConstants from '../constants/constants';
 import redisConnection from '../utils/redisConnection';
 import { IUser } from '../interfaces/user.interface';
 import { UserService } from './userService';
-import TYPES from '../constants/types';
 
-dotenv.config();
-
-@injectable()
 export class AuthService {
-  @inject(TYPES.UserService) private userService: UserService;
+  private userService: UserService = new UserService();
+
+  private readonly jwtService: JwtService = JwtService;
 
   private redisClient = redisConnection;
 
@@ -36,10 +32,10 @@ export class AuthService {
       login: user.login,
     };
 
-    const accessToken = jwtService.sign(payload, authConstants.secret, {
+    const accessToken = this.jwtService.sign(payload, authConstants.secret, {
       expiresIn: authConstants.expirationTime.jwt.default.accessToken,
     });
-    const refreshToken = jwtService.sign(payload, authConstants.secret, {
+    const refreshToken = this.jwtService.sign(payload, authConstants.secret, {
       expiresIn: authConstants.expirationTime.jwt.default.refreshToken,
     });
 
@@ -56,12 +52,12 @@ export class AuthService {
     };
   }
 
-  public getRefreshTokenByEmail(email: string): Promise<string | null> {
-    return this.redisClient.get(email);
+  public getRefreshTokenByLogin(login: string): Promise<string | null> {
+    return this.redisClient.get(login);
   }
 
-  public deleteTokenByEmail(email: string): Promise<number> {
-    return this.redisClient.del(email);
+  public deleteTokenByLogin(login: string): Promise<number> {
+    return this.redisClient.del(login);
   }
 
   public deleteAllTokens(): Promise<string> {
@@ -77,7 +73,7 @@ export class AuthService {
     );
   }
 
-  public getByToken(token: string): Promise<string | null> {
-    return this.redisClient.get(token);
+  public getByToken(token: string | string[]) {
+    return this.jwtService.verify(token, authConstants.secret);
   }
 }

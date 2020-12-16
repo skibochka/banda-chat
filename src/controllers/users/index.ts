@@ -1,38 +1,30 @@
-import {
-  controller, httpGet, httpPost, BaseHttpController,
-} from 'inversify-express-utils';
-import { inject } from 'inversify';
-import { JsonResult } from 'inversify-express-utils/dts/results';
+import * as express from 'express';
 import { UserService } from '../../services/userService';
 import { UserValidation } from './validation';
 import ValidationError from '../../middleware/ValidationError';
 import { IUser } from '../../interfaces/user.interface';
-import TYPES from '../../constants/types';
 
-@controller('/users')
-export class UsersController extends BaseHttpController {
-    @inject(TYPES.UserService) private userService: UserService;
+export class UserController {
+  private userService: UserService = new UserService();
 
-    @inject(TYPES.UserValidation) private userValidation: UserValidation;
+  private userValidation: UserValidation = new UserValidation();
 
-  @httpGet('/')
-    private async getAll(): Promise<JsonResult> {
-      const users = await this.userService.getAll();
-      if (!users) {
-        throw new Error('User not found');
-      }
-
-      return this.json(users, 200);
+  public getAll = async (_req, res, _next): Promise<express.Response> => {
+    const users = await this.userService.getAll();
+    if (!users) {
+      throw new Error('User not found');
     }
 
-  @httpPost('/create')
-  private async create(): Promise<JsonResult> {
-    const { error } = this.userValidation.checkUser(this.httpContext.request.body);
+    return res.json(users);
+  }
+
+  public create = async (req, res, _next): Promise<express.Response> => {
+    const { error } = this.userValidation.checkUser(req.body);
 
     if (error) throw new ValidationError(error.details);
 
-    const user: IUser = await this.userService.create(this.httpContext.request.body);
+    const user: IUser = await this.userService.create(req.body);
 
-    return this.json(user, 200);
+    return res.json(user);
   }
 }

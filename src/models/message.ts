@@ -1,6 +1,6 @@
 import { Schema, Model } from 'mongoose';
 import { connection } from './connection';
-import Message from '../interfaces/message.interface';
+import { Message } from '../interfaces/message.interface';
 
 class MessageModel {
   MessagesSchema(): Schema {
@@ -11,6 +11,10 @@ class MessageModel {
           required: true,
         },
         sender: {
+          type: String,
+          required: true,
+        },
+        roomName: {
           type: String,
           required: true,
         },

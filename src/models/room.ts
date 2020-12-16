@@ -1,6 +1,6 @@
 import { Schema, Model } from 'mongoose';
 import { connection } from './connection';
-import Room from '../interfaces/room.interface';
+import { Room } from '../interfaces/room.interface';
 
 class RoomModel {
   RoomSchema(): Schema {

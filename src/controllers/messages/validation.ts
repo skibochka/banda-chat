@@ -7,7 +7,7 @@ class Validation {
         content: Joi
           .string()
           .required(),
-        sender: Joi
+        roomName: Joi
           .string()
           .required(),
       })
@@ -17,15 +17,15 @@ class Validation {
   public getMessages(data) {
     return Joi
       .object({
-        roomId: Joi
+        roomName: Joi
           .string()
           .required(),
         limit: Joi
           .number()
-          .required(),
+          .optional(),
         page: Joi
           .number()
-          .required(),
+          .optional(),
       })
       .validate(data);
   }
@@ -59,9 +59,6 @@ class Validation {
         roomName: Joi
           .string()
           .required(),
-        members: Joi
-          .array()
-          .required(),
       })
       .validate(data);
   }
@@ -75,5 +72,6 @@ class Validation {
       })
       .validate(data);
   }
+
 }
 export default new Validation();

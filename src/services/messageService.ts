@@ -1,5 +1,5 @@
 import Messages from '../models/message';
-import IMessage from '../interfaces/message.interface';
+import { IMessage } from '../interfaces/message.interface';
 import IGetMessages from '../interfaces/getMessages.interface';
 import IUpdateMessages from '../interfaces/updateMessages.interface';
 
@@ -17,9 +17,7 @@ class MessageService {
   }
 
   public async getMessages(data: IGetMessages) {
-    return Messages.find({ })
-      .skip(await Messages.count({}) - data.limit)
-      .limit(data.limit);
+    return Messages.find({ roomName: data.roomName });
   }
 }
 

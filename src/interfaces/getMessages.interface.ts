@@ -1,6 +1,6 @@
 /* eslint-disable semi */
 export default interface IGetMessages {
-  roomId: string
+  roomName: string
   limit: number
   page: number
 }

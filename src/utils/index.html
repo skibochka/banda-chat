@@ -42,7 +42,7 @@
         }
 
         /* Style the tab content */
-        .tabcontent {
+        .tabContent {
             display: none;
             padding: 6px 12px;
             -webkit-animation: fadeEffect 1s;
@@ -65,170 +65,165 @@
 <!-- Основная часть страницы -->
 <div class="container">
     <div class="py-5 text-center">
-        <h2>Чат программа</h2>
-        <p class="lead">Укажите ваше имя и начинайте переписку</p>
+        <h2>Simple chat</h2>
     </div>
-    <div>
-        <form id="createRoom">
-            <label for="name">Имя комнаты</label>
-            <input type="text" name="name" id="roomName" autocomplete="off" placeholder="Введите название" class="form-control">
-            <br>
-            <input type="submit" value="Создать" class="btn btn-danger">
-        </form>
-    </div>
-    <div>
-        <form id="joinRoom">
-            <label for="name">Имя комнаты</label>
-            <input type="text" name="name" id="joinRoomName" placeholder="Введите название" class="form-control">
-            <br>
-            <input type="submit" value="Join" class="btn btn-danger">
-        </form>
-    </div>
-    <div class="row">
-        <div class="col-6">
-            <!-- Форма для получения сообщений и имени -->
-            <h3>Форма сообщений</h3>
-            <form id="messForm">
-                <label for="name">Имя</label>
-                <input type="text" name="name" id="name" autocomplete="off" placeholder="Введите имя" class="form-control">
-                <br>
-                <label for="message">Сообщение</label>
-                <textarea name="message" id="message" class="form-control" placeholder="Введите сообщение"></textarea>
-                <br>
-                <input type="submit" value="Отправить" class="btn btn-danger">
-            </form>
-            <form id="messRoom">
-                <input type="submit" value="В комнату" class="btn btn-danger">
-            </form>
+    <!-- Button trigger modal -->
+    <button type="button" class="btn btn-danger" data-toggle="modal" data-target="#createRoomModal">
+        Create room
+    </button>
+    <!-- Modal -->
+    <div class="modal fade" id="createRoomModal" tabindex="-1" role="dialog" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Create new room</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <form id="createRoom">
+                        <label for="createRoomName">New room name</label>
+                        <input type="text" name="name" id="createRoomName" autocomplete="off" placeholder="Enter name" class="form-control">
+                        <br>
+                        <input type="submit" value="Создать" class="btn btn-danger">
+                    </form>
+                </div>
+            </div>
         </div>
-        <div class="col-6">
+    </div>
+    <!-- Button trigger modal -->
+    <button type="button" class="btn btn-danger" data-toggle="modal" data-target="#joinRoomModal">
+        Join room
+    </button>
+    <!-- Modal -->
+    <div class="modal fade" id="joinRoomModal" tabindex="-1" role="dialog" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Join new room</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <form id="joinRoom">
+                        <label for="joinRoomName">Room name</label>
+                        <input type="text" name="name" id="joinRoomName" placeholder="Enter name" class="form-control">
+                        <br>
+                        <input type="submit" value="Join" class="btn btn-danger">
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <div id="tabsContent" class="col-6">
             <h3>Сообщения</h3>
-            <div class="tab">
-                <button class="tablinks" onclick="openCity(event, 'allMessages')">All messages</button>
-                <button class="tablinks" onclick="openCity(event, 'roomMessages')">Room</button>
-            </div>
-
-            <div id="allMessages" class="tabcontent">
-                <h3>All messages</h3>
-                <div id="all_mess"></div>
-            </div>
-
-            <div id="roomMessages" class="tabcontent">
-                <h3>Room</h3>
-                <div id="test"></div>
-            </div>
+            <div id= "tabs" class="tab"></div>
         </div>
     </div>
 </div>
 <!-- Подключаем jQuery, а также Socket.io -->
+<script src="https://code.jquery.com/jquery-3.2.1.slim.min.js" integrity="sha384-KJ3o2DKtIkvYIK3UENzmM7KCkRr/rE9/Qpg6aAZGJwFDMVNA/GpGFF93hXpG5KkN" crossorigin="anonymous"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js" integrity="sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7hUibX39j7fakFPskvXusvfa0b4Q" crossorigin="anonymous"></script>
+<script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js" integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl" crossorigin="anonymous"></script>
 <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
 <script src="/socket.io/socket.io.js"></script>
 <script>
-  function openCity(evt, cityName) {
-    var i, tabcontent, tablinks;
-    tabcontent = document.getElementsByClassName("tabcontent");
-    for (i = 0; i < tabcontent.length; i++) {
-      tabcontent[i].style.display = "none";
+  function openTab(event, tabName) {
+    const tabContent = document.getElementsByClassName("tabContent");
+    for (let i = 0; i < tabContent.length; i++) {
+      tabContent[i].style.display = "none";
     }
-    tablinks = document.getElementsByClassName("tablinks");
-    for (i = 0; i < tablinks.length; i++) {
-      tablinks[i].className = tablinks[i].className.replace(" active", "");
+    const tabLinks = document.getElementsByClassName("tabLinks");
+    for (let i = 0; i < tabLinks.length; i++) {
+      tabLinks[i].className = tabLinks[i].className.replace(" active", "");
     }
-    document.getElementById(cityName).style.display = "block";
-    evt.currentTarget.className += " active";
+    document.getElementById(tabName).style.display = "block";
+    event.currentTarget.className += " active";
   }
+
+
   // Функция для работы с данными на сайте
   $(function() {
     // Включаем socket.io и отслеживаем все подключения
     const socket = io.connect();
-    socket.emit('msg.get', { roomId: '1', limit: 5, page: 0 });
-    socket.on('msg.get', (messages) => {
-      messages.forEach((element) => {
-        $all_messages.append("<div class='alert alert-" + 'warning' + "'><b>" + element.sender + "</b>: " + element.content + "</div>");
-      })
-    });
-    // Делаем переменные на:
-    const $form = $("#messForm"); // Форму сообщений
-    const $name = $("#name"); // Поле с именем
-    const $textarea = $("#message"); // Текстовое поле
-    const $all_messages = $("#all_mess"); // Блок с сообщениями
+    const $user = 'username';
 
-    // Отслеживаем нажатие на кнопку в форме сообщений
-    $form.submit(function(event) {
-      // Предотвращаем классическое поведение формы
+    socket.emit('room.get.all');
+    socket.on('room.get.all', (rooms) => {
+      createRooms(rooms);
+    });
+
+    $(".container").on('submit', (event) => {
       event.preventDefault();
-      // В сокет отсылаем новое событие 'send mess',
-      // в событие передаем различные параметры и данные
-      socket.emit('msg', { content: $textarea.val(), sender: $name.val() });
-      $all_messages.append("<div class='alert alert-" + 'success' + "'><b>" + $name.val() + "</b>: " + $textarea.val() + "</div>");
-      // Очищаем поле с сообщением
-      $textarea.val('');
-    });
 
-    // Делаем переменные на:
-    const $messRoom = $("#messRoom"); // Форму сообщений
-    const $RoomName = $("#joinRoomName");
+      if (event.target.id === 'joinRoom') {
+        socket.emit('room.join', { roomName: $('#joinRoomName').val() });
+        $('#joinRoomName').val('');
+      }
 
-    // Отправка собщений в разные комнаты
-    const $room_messages = $("#test");
-    $messRoom.submit(function(event) {
-      // Предотвращаем классическое поведение формы
-      event.preventDefault();
-      // В сокет отсылаем новое событие 'send mess',
-      // в событие передаем различные параметры и данные
-      socket.emit('room.msg', { content: $textarea.val(), sender: $name.val(), roomName: $RoomName.val() });
-      $room_messages.append("<div class='alert alert-success" + "'><b>" + $name.val() + "</b>: " + $textarea.val() + "</div>");
-      // Очищаем поле с сообщением
-      $textarea.val('');
-    });
+      if (event.target.id === 'createRoom') {
+        const roomName = $('#createRoomName').val()
+        socket.emit('room.create', { roomName });
+        $(roomName).val('');
+      }
 
-    // Делаем переменные на:
-    const $newRoom = $("#createRoom"); // Форму создания комнаты
-    const $roomName = $("#roomName"); // Поле с именем комнаты
+      if (event.target.id !== 'joinRoom' && event.target.id !== 'createRoom') {
+        const roomName = event.target.id;
+        const messageText = $(`#${roomName}Message`).val();
 
-    // Отслеживаем нажатие на кнопку в форме создания комнаты
-    $newRoom.submit(function(event) {
-      // Предотвращаем классическое поведение формы
-      event.preventDefault();
-      // В сокет отсылаем новое событие 'room.create',
-      // в событие передаем различные параметры и данные
-      socket.emit('room.create', { roomName: $roomName.val(), members:[$name.val()] });
-      // Очищаем поле названия комнаты
-      $roomName.val('');
-    });
+        socket.emit('room.msg', {
+          content: $(`#${roomName}Message`).val(),
+          roomName,
+        });
 
-    // Делаем переменные на:
-    const $joinRoom = $("#joinRoom"); // Форму конекта к комнате
-    const $joinRoomName = $("#joinRoomName"); // Поле с именем комнаты
-
-    // Отслеживаем нажатие на кнопку в форме конекта к комнаты
-    $joinRoom.submit(function(event) {
-      // Предотвращаем классическое поведение формы
-      event.preventDefault();
-      // Делаем конект к комнате
-      console.log($joinRoomName.val())
-      socket.emit('room.join', { roomName: $joinRoomName.val()});
-    });
-
-    // Здесь отслеживаем событие 'msg',
-    // которое должно приходить из сокета в случае добавления нового сообщения
-    socket.on('msg', (data) => {
-      console.log(data);
-      // Встраиваем полученное сообщение в блок с сообщениями
-      // У блока с сообщением будет тот класс, который соответвует пользователю что его отправил
-      $all_messages.append("<div class='alert alert-" + 'warning' + "'><b>" + data.sender + "</b>: " + data.content + "</div>");
+        $(`#${roomName}Messages`).append(`<div class='alert alert-success'><b>${ $user }</b>: ${ messageText }</div>`);
+        $(`#${roomName}`).val('');
+      }
     })
 
+    $(".container").on('button', (event) => {
+      console.log(event.target);
+    });
+
     socket.on('room.msg', (data) => {
-      console.log($room_messages);
-      $room_messages.append("<div class='alert alert-" + 'warning' + "'><b>" + data.sender + "</b>: " + data.content + "</div>");
+      $(`#${data.roomName}Messages`).append(`<div class='alert alert-warning'><b>${ data.sender }</b>: ${ data.content }</div>`);
     })
 
     socket.on('room.create', (newRoom) => {
+      createRooms([newRoom]);
       socket.emit('room.join', { roomName: newRoom });
     })
 
+    socket.on('room.join', roomName => {
+      createRooms([roomName]);
+    });
+
+    function createRooms(rooms) {
+      const $tabs = $('#tabs');
+      const $tabsContent = $('#tabsContent');
+      rooms.forEach((roomName) => {
+        $tabs.append(`<button class="tabLinks" onclick="openTab(event, '${roomName}Content')">${roomName}</button>`);
+        $tabsContent.append(`
+        <div id="${roomName}Content" class="tabContent">
+                <h3>${roomName}</h3>
+                <div id="${roomName}Messages" style="overflow: scroll; width: 300px;height: 300px;"></div>
+                <div class="col-6">
+                    <form id="${roomName}">
+                        <label for="${roomName}Message">Сообщение</label>
+                        <textarea name="message" id="${roomName}Message" class="form-control"" placeholder="Введите сообщение"></textarea>
+                        <input type="submit" value="Отправить" class="btn btn-danger">
+                    </form>
+                </div>
+            </div>`);
+      });
+    }
   });
+
+
 </script>
 </body>
 </html>

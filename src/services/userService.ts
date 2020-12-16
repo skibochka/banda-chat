@@ -1,33 +1,24 @@
 import * as bcrypt from 'bcrypt';
 import Users from '../models/user';
-import IUsers from '../interfaces/user.interface';
+import { IUser } from '../interfaces/user.interface';
 
 export class UserService {
-  /**
-   * @method getAll
-   * @returns {Promise<IUsers[]>} list of users
-   */
-  public async getAll(): Promise<IUsers[]> {
+  public async getAll(): Promise<IUser[]> {
     return Users.find({});
   }
 
-  /**
-   * @method getOne
-   * @param {IUsers} login user credentials
-   * @returns {Promise<IUsers>} one user
-   */
-  public async getOne(login: string): Promise<IUsers> {
+  public async getOne(login: string): Promise<IUser> {
     return Users.findOne({ login });
   }
 
-  /**
-   * @method create
-   * @param {IUsers} body user credentials
-   * @returns {Promise<IUsers>} created user
-   */
-  public async create(body: IUsers): Promise<IUsers> {
+  public async create(body: IUser): Promise<IUser> {
     const creds = body;
     creds.password = await bcrypt.hash(body.password, 10);
     return Users.create(creds);
   }
+
+  public async updateUser(data: IUser) {
+    return Users.updateOne({ login: data.login }, { rooms: data.rooms });
+  }
 }
+export default new UserService();

@@ -1,0 +1,229 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <!-- Подключение Bootstrap чтобы все выглядело красиво -->
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.2.1/css/bootstrap.min.css">
+    <title>Чат программа</title>
+    <!-- Свои стили -->
+    <style>
+        body {
+            background: #fcfcfc;
+        }
+        /* Style the tab */
+        .tab {
+            overflow: hidden;
+            border: 1px solid #ccc;
+            background-color: #f1f1f1;
+        }
+
+        /* Style the buttons inside the tab */
+        .tab button {
+            background-color: inherit;
+            float: left;
+            border: none;
+            outline: none;
+            cursor: pointer;
+            padding: 14px 16px;
+            transition: 0.3s;
+            font-size: 17px;
+        }
+
+        /* Change background color of buttons on hover */
+        .tab button:hover {
+            background-color: #ddd;
+        }
+
+        /* Create an active/current tablink class */
+        .tab button.active {
+            background-color: #ccc;
+        }
+
+        /* Style the tab content */
+        .tabContent {
+            display: none;
+            padding: 6px 12px;
+            -webkit-animation: fadeEffect 1s;
+            animation: fadeEffect 1s;
+        }
+
+        /* Fade in tabs */
+        @-webkit-keyframes fadeEffect {
+            from {opacity: 0;}
+            to {opacity: 1;}
+        }
+
+        @keyframes fadeEffect {
+            from {opacity: 0;}
+            to {opacity: 1;}
+        }
+    </style>
+</head>
+<body>
+<!-- Основная часть страницы -->
+<div class="container">
+    <div class="py-5 text-center">
+        <h2>Simple chat</h2>
+    </div>
+    <!-- Button trigger modal -->
+    <button type="button" class="btn btn-danger" data-toggle="modal" data-target="#createRoomModal">
+        Create room
+    </button>
+    <!-- Modal -->
+    <div class="modal fade" id="createRoomModal" tabindex="-1" role="dialog" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Create new room</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <form id="createRoom">
+                        <label for="createRoomName">New room name</label>
+                        <input type="text" name="name" id="createRoomName" autocomplete="off" placeholder="Enter name" class="form-control">
+                        <br>
+                        <input type="submit" value="Создать" class="btn btn-danger">
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- Button trigger modal -->
+    <button type="button" class="btn btn-danger" data-toggle="modal" data-target="#joinRoomModal">
+        Join room
+    </button>
+    <!-- Modal -->
+    <div class="modal fade" id="joinRoomModal" tabindex="-1" role="dialog" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Join new room</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <form id="joinRoom">
+                        <label for="joinRoomName">Room name</label>
+                        <input type="text" name="name" id="joinRoomName" placeholder="Enter name" class="form-control">
+                        <br>
+                        <input type="submit" value="Join" class="btn btn-danger">
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <div id="tabsContent" class="col-6">
+            <h3>Сообщения</h3>
+            <div id= "tabs" class="tab"></div>
+        </div>
+    </div>
+</div>
+<!-- Подключаем jQuery, а также Socket.io -->
+<script src="https://code.jquery.com/jquery-3.2.1.slim.min.js" integrity="sha384-KJ3o2DKtIkvYIK3UENzmM7KCkRr/rE9/Qpg6aAZGJwFDMVNA/GpGFF93hXpG5KkN" crossorigin="anonymous"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js" integrity="sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7hUibX39j7fakFPskvXusvfa0b4Q" crossorigin="anonymous"></script>
+<script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js" integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl" crossorigin="anonymous"></script>
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+<script src="/socket.io/socket.io.js"></script>
+<script>
+  function openTab(event, tabName) {
+    const tabContent = document.getElementsByClassName("tabContent");
+    for (let i = 0; i < tabContent.length; i++) {
+      tabContent[i].style.display = "none";
+    }
+    const tabLinks = document.getElementsByClassName("tabLinks");
+    for (let i = 0; i < tabLinks.length; i++) {
+      tabLinks[i].className = tabLinks[i].className.replace(" active", "");
+    }
+    document.getElementById(tabName).style.display = "block";
+    event.currentTarget.className += " active";
+  }
+
+
+  // Функция для работы с данными на сайте
+  $(function() {
+    // Включаем socket.io и отслеживаем все подключения
+    const socket = io.connect();
+    const $user = 'username';
+
+    socket.emit('room.get.all');
+    socket.on('room.get.all', (rooms) => {
+      createRooms(rooms);
+    });
+
+    $(".container").on('submit', (event) => {
+      event.preventDefault();
+
+      if (event.target.id === 'joinRoom') {
+        socket.emit('room.join', { roomName: $('#joinRoomName').val() });
+        $('#joinRoomName').val('');
+      }
+
+      if (event.target.id === 'createRoom') {
+        const roomName = $('#createRoomName').val()
+        socket.emit('room.create', { roomName });
+        $(roomName).val('');
+      }
+
+      if (event.target.id !== 'joinRoom' && event.target.id !== 'createRoom') {
+        const roomName = event.target.id;
+        const messageText = $(`#${roomName}Message`).val();
+
+        socket.emit('room.msg', {
+          content: $(`#${roomName}Message`).val(),
+          roomName,
+        });
+
+        $(`#${roomName}Messages`).append(`<div class='alert alert-success'><b>${ $user }</b>: ${ messageText }</div>`);
+        $(`#${roomName}`).val('');
+      }
+    })
+
+    $(".container").on('button', (event) => {
+      console.log(event.target);
+    });
+
+    socket.on('room.msg', (data) => {
+      $(`#${data.roomName}Messages`).append(`<div class='alert alert-warning'><b>${ data.sender }</b>: ${ data.content }</div>`);
+    })
+
+    socket.on('room.create', (newRoom) => {
+      createRooms([newRoom]);
+      socket.emit('room.join', { roomName: newRoom });
+    })
+
+    socket.on('room.join', roomName => {
+      createRooms([roomName]);
+    });
+
+    function createRooms(rooms) {
+      const $tabs = $('#tabs');
+      const $tabsContent = $('#tabsContent');
+      rooms.forEach((roomName) => {
+        $tabs.append(`<button class="tabLinks" onclick="openTab(event, '${roomName}Content')">${roomName}</button>`);
+        $tabsContent.append(`
+        <div id="${roomName}Content" class="tabContent">
+                <h3>${roomName}</h3>
+                <div id="${roomName}Messages" style="overflow: scroll; width: 300px;height: 300px;"></div>
+                <div class="col-6">
+                    <form id="${roomName}">
+                        <label for="${roomName}Message">Сообщение</label>
+                        <textarea name="message" id="${roomName}Message" class="form-control"" placeholder="Введите сообщение"></textarea>
+                        <input type="submit" value="Отправить" class="btn btn-danger">
+                    </form>
+                </div>
+            </div>`);
+      });
+    }
+  });
+
+
+</script>
+</body>
+</html>

@@ -1,6 +1,6 @@
 import { Schema, Model } from 'mongoose';
 import { connection } from './connection';
-import User from '../interfaces/user.interface';
+import { User } from '../interfaces/user.interface';
 
 class UserModel {
   UsersSchema(): Schema {
@@ -12,6 +12,10 @@ class UserModel {
         },
         password: {
           type: String,
+          required: true,
+        },
+        rooms: {
+          type: Object,
           required: true,
         },
       },

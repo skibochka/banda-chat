@@ -19,7 +19,7 @@ export class UserController {
   }
 
   public create = async (req, res, _next): Promise<express.Response> => {
-    const { error } = this.userValidation.checkUser(req.body);
+    const { error } = this.userValidation.signUp(req.body);
 
     if (error) throw new ValidationError(error.details);
 

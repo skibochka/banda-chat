@@ -1,11 +1,11 @@
 import * as http from 'http';
 import * as express from 'express';
 import { config } from 'dotenv';
+import * as io from 'socket.io';
 import Config from './utils/app.config';
 import AuthRouter from './controllers/auth/router';
 import UserRouter from './controllers/users/router';
 import ErrorHandler from './middleware/errorHandler';
-import * as io from 'socket.io';
 import { Client } from './controllers/messages/client';
 
 
@@ -29,11 +29,7 @@ class Server {
     const ioServer = new io.Server(serverInstance);
 
     ioServer.on('connection', async (socket) => {
-      console.log(`user ${socket.id} is connected`);
-      const client = await Client.build(socket);
-      client.on('new-event', (data) => {
-        ioServer.emit(data.event, data.content);
-      });
+      await Client.build(socket);
     });
     return serverInstance;
   }

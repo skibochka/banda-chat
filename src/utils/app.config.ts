@@ -3,6 +3,7 @@ import * as compression from 'compression';
 import * as cookieParser from 'cookie-parser';
 import * as helmet from 'helmet';
 import * as express from 'express';
+import * as cors from 'cors';
 
 class Config {
   public init(app: express.Application): void {
@@ -10,8 +11,8 @@ class Config {
     app.use(bodyParser.json());
     app.use(cookieParser());
     app.use(compression());
-    app.use(helmet());
-    app.use(cors());
+    // app.use(helmet());
+    // app.use(cors());
     app.get('/', (req, res) => {
       res.sendFile(`${__dirname}/index.html`);
     });

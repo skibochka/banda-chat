@@ -72,6 +72,5 @@ class Validation {
       })
       .validate(data);
   }
-
 }
 export default new Validation();

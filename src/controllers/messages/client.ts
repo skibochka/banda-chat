@@ -11,9 +11,8 @@ import { IRoom } from '../../interfaces/room.interface';
 import { IMessage } from '../../interfaces/message.interface';
 
 
-export class Client extends EventEmitter {
+export class Client {
   constructor(socket: Socket, user) {
-    super();
     this.user = user;
     this.joinRooms();
 
@@ -69,7 +68,7 @@ export class Client extends EventEmitter {
 
     await MessageService.updateMessage(data);
 
-    return this.emit('new-event', { event: 'msg.update', content: data });
+    return this.socket.emit('msg.update', { data });
   }
 
   async deleteMessage(msgId: string): Promise<boolean> {
@@ -79,7 +78,7 @@ export class Client extends EventEmitter {
 
     await MessageService.deleteMessage(msgId);
 
-    return this.emit('new-event', { event: 'msg.delete', content: msgId });
+    return this.socket.emit('msg.delete', { msgId });
   }
 
   async createRoom(data: IRoom): Promise<boolean> {
@@ -147,10 +146,7 @@ export class Client extends EventEmitter {
   async joinRooms(): Promise<void> {
     const { rooms } = await UserService.getOne(this.user);
     if (rooms) {
-      rooms.forEach((room) => {
-        console.log(`${this.socket} connected to ${room}`);
-        this.socket.join(room);
-      });
+      rooms.forEach((room) => this.socket.join(room));
     }
   }
 }

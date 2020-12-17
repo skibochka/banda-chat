@@ -13,7 +13,7 @@ class Config {
     app.use(compression());
     // app.use(helmet());
     // app.use(cors());
-    app.get('/', (req, res) => {
+    app.get('/chat', (req, res) => {
       res.sendFile(`${__dirname}/index.html`);
     });
     app.set('port', process.env.PORT || 3000);

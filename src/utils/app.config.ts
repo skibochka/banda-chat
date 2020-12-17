@@ -4,7 +4,6 @@ import * as cookieParser from 'cookie-parser';
 import * as helmet from 'helmet';
 import * as cors from 'cors';
 import * as express from 'express';
-import * as cors from 'cors';
 
 class Config {
   public init(app: express.Application): void {

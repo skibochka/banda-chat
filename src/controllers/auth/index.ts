@@ -14,7 +14,7 @@ export class AuthController {
   private userValidation: UserValidation = new UserValidation();
 
   public signIn = async (req, res, _next): Promise<express.Response> => {
-    const { error } = this.userValidation.signIn(req.body);
+    const { error } = this.userValidation.checkUser(req.body);
 
     if (error) throw new ValidationError(error.details);
 
@@ -28,7 +28,7 @@ export class AuthController {
   }
 
   public signUp = async (req, res, _next): Promise<express.Response> => {
-    const { error } = this.userValidation.signUp(req.body);
+    const { error } = this.userValidation.checkUser(req.body);
 
     if (error) throw new ValidationError(error.details);
 

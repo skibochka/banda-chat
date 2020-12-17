@@ -1,12 +1,13 @@
 import * as http from 'http';
 import * as express from 'express';
 import { config } from 'dotenv';
+import * as io from 'socket.io';
 import Config from './utils/app.config';
 import AuthRouter from './controllers/auth/router';
 import UserRouter from './controllers/users/router';
 import ErrorHandler from './middleware/errorHandler';
+import { Client } from './controllers/messages/client';
 
-config();
 
 class Server {
   private app: express.Application;
@@ -22,9 +23,15 @@ class Server {
   }
 
   public start(): http.Server {
-    return this.app.listen(this.app.get('port'), () => {
-      console.log(`server is listening on port: ${this.app.get('port')}`);
+    const serverInstance = this.app.listen(this.app.get('port'), () => {
+      console.log(`Server is running on port ${this.app.get('port')}`);
     });
+    const ioServer = new io.Server(serverInstance);
+
+    ioServer.on('connection', async (socket) => {
+      await Client.build(socket);
+    });
+    return serverInstance;
   }
 }
 

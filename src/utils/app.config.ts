@@ -11,8 +11,11 @@ class Config {
     app.use(bodyParser.json());
     app.use(cookieParser());
     app.use(compression());
-    app.use(helmet());
-    app.use(cors());
+    // app.use(helmet());
+    // app.use(cors());
+    app.get('/chat', (req, res) => {
+      res.sendFile(`${__dirname}/index.html`);
+    });
     app.set('port', process.env.PORT || 3000);
   }
 }

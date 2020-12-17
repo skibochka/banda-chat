@@ -32,6 +32,7 @@ export class AuthController {
 
     if (error) throw new ValidationError(error.details);
 
+    req.body.rooms = [];
     const user: IUser = await this.userServices.create(req.body);
 
     return res.json(user);

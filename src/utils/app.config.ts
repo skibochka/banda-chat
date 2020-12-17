@@ -2,6 +2,7 @@ import * as bodyParser from 'body-parser';
 import * as compression from 'compression';
 import * as cookieParser from 'cookie-parser';
 import * as helmet from 'helmet';
+import * as cors from 'cors';
 import * as express from 'express';
 import * as cors from 'cors';
 
@@ -16,7 +17,6 @@ class Config {
     app.get('/', (req, res) => {
       res.sendFile(`${__dirname}/index.html`);
     });
-    console.log(__dirname);
     app.set('port', process.env.PORT || 3000);
   }
 }

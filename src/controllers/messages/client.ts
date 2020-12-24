@@ -1,5 +1,5 @@
-import { EventEmitter } from 'events';
 import { Socket } from 'socket.io';
+import * as JwtService from 'jsonwebtoken';
 import Validation from './validation';
 import ValidationError from '../../middleware/ValidationError';
 import MessageService from '../../services/messageService';
@@ -9,6 +9,8 @@ import IGetMessages from '../../interfaces/getMessages.interface';
 import IUpdateMessages from '../../interfaces/updateMessages.interface';
 import { IRoom } from '../../interfaces/room.interface';
 import { IMessage } from '../../interfaces/message.interface';
+import authConstants from '../../constants/constants';
+import { IUser } from '../../interfaces/user.interface';
 
 
 export class Client {
@@ -25,16 +27,19 @@ export class Client {
     this.socket.on('room.join', (room) => this.joinRoom(room));
     this.socket.on('room.msg', (message) => this.roomMessage(message));
     this.socket.on('room.get.all', () => this.getRooms());
+    this.socket.on('user.get', () => this.getUser());
+    this.socket.on('user.change.name', (newName) => this.changeName(newName));
   }
 
-  private user: string
+  private user: IUser
 
   private socket: Socket
 
   static async build(socket) {
     try {
-      // const userData = await validateToken(socket.token);
-      return new this(socket, 'skiba');
+      const { name, email } = JwtService.verify(socket.handshake.query.token, authConstants.secret);
+
+      return new this(socket, { name, email });
     } catch (e) {
       socket.close();
       return null;
@@ -88,10 +93,10 @@ export class Client {
 
     const room: IRoom = await RoomService.findRoom(data.roomName);
     if (!room) {
-      const newRoom = await RoomService.createRoom({ roomName: data.roomName, members: [this.user] });
-      const { rooms } = await UserService.getOne(this.user);
+      const newRoom = await RoomService.createRoom({ roomName: data.roomName, members: [this.user.email] });
+      const { rooms } = await UserService.getOne(this.user.email);
       rooms.push(data.roomName);
-      await UserService.updateUser({ login: this.user, rooms });
+      await UserService.updateUser(this.user.email,{ rooms });
 
       return this.socket.emit('room.create', newRoom.roomName);
     }
@@ -106,12 +111,12 @@ export class Client {
 
     const room: IRoom = await RoomService.findRoom(data.roomName);
     if (room) {
-      if (!room.members.includes(this.user)) {
-        room.members.push(this.user);
+      if (!room.members.includes(this.user.email)) {
+        room.members.push(this.user.email);
         await RoomService.addMember(room);
-        const { rooms } = await UserService.getOne(this.user);
+        const { rooms } = await UserService.getOne(this.user.email);
         rooms.push(data.roomName);
-        await UserService.updateUser({ login: this.user, rooms });
+        await UserService.updateUser(this.user.email,{ rooms });
 
         this.socket.join(room.roomName);
         return this.socket.emit('room.join', data.roomName);
@@ -131,7 +136,7 @@ export class Client {
     const data: IMessage = {
       content: roomMessage.content,
       roomName: roomMessage.roomName,
-      sender: this.user,
+      sender: this.user.name,
     };
 
     await MessageService.createMessage(data);
@@ -139,14 +144,24 @@ export class Client {
   }
 
   async getRooms() {
-    const { rooms } = await UserService.getOne(this.user);
+    const { rooms } = await UserService.getOne(this.user.email);
     return this.socket.emit('room.get.all', rooms);
   }
 
   async joinRooms(): Promise<void> {
-    const { rooms } = await UserService.getOne(this.user);
+    const { rooms } = await UserService.getOne(this.user.email);
     if (rooms) {
       rooms.forEach((room) => this.socket.join(room));
     }
+  }
+
+  async getUser(): Promise<boolean> {
+    const user: IUser = await UserService.getOne(this.user.email);
+    return this.socket.emit('user.get', user);
+  }
+
+  async changeName(newName): Promise<boolean> {
+    await UserService.updateUser(this.user.email, { name: newName });
+    return this.socket.emit('user.change.name', newName);
   }
 }

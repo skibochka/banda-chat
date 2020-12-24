@@ -4,6 +4,7 @@ import { config } from 'dotenv';
 import * as io from 'socket.io';
 import Config from './utils/app.config';
 import AuthRouter from './controllers/auth/router';
+import PublicRouter from './controllers/messages/router'
 import UserRouter from './controllers/users/router';
 import ErrorHandler from './middleware/errorHandler';
 import { Client } from './controllers/messages/client';
@@ -18,6 +19,7 @@ class Server {
 
     AuthRouter.init(this.app);
     UserRouter.init(this.app);
+    PublicRouter.init(this.app);
 
     ErrorHandler.init(this.app);
   }

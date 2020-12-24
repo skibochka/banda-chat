@@ -26,6 +26,11 @@ class UserRouter extends BaseRouter {
       this.asyncWrapper(this.userController.create),
     );
 
+    router.post(
+      '/newAvatar',
+      this.asyncWrapper(this.userController.changeAvatar),
+    );
+
     this.router = router;
   }
 

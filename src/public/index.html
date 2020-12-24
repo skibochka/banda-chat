@@ -5,7 +5,7 @@
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
     <!-- Подключение Bootstrap чтобы все выглядело красиво -->
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.2.1/css/bootstrap.min.css">
-    <title>Чат программа</title>
+    <title>Simple Chat</title>
     <!-- Свои стили -->
     <style>
         body {
@@ -66,6 +66,31 @@
     <div class="py-5 text-center">
         <h2>Simple chat</h2>
     </div>
+    <button style="position: absolute; top: 35px; right: 40px; border: 0; background: transparent;" id="profilePlace" type="button" data-toggle="modal" data-target="#editProfile">
+    </button>
+    <div class="modal fade" id="editProfile" tabindex="-1" role="dialog" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Create new room</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <form id="changeName">
+                        <input type="text" name="name" id="newName" autocomplete="off" placeholder="Enter new name" class="form-control">
+                        <input type="submit" value="Edit" class="btn btn-danger">
+                    </form>
+                    <form id="changeAvatar">
+                        <input type="file" class="custom-file-input" id="newAvatar" name="newAvatar">
+                        <input type="submit" value="Edit" class="btn btn-danger">
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <!-- Button trigger modal -->
     <button type="button" class="btn btn-danger" data-toggle="modal" data-target="#createRoomModal">
         Create room
@@ -129,6 +154,7 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js" integrity="sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7hUibX39j7fakFPskvXusvfa0b4Q" crossorigin="anonymous"></script>
 <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js" integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl" crossorigin="anonymous"></script>
 <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
 <script src="/socket.io/socket.io.js"></script>
 <script>
   function openTab(event, tabName) {
@@ -148,8 +174,19 @@
   // Функция для работы с данными на сайте
   $(function() {
     // Включаем socket.io и отслеживаем все подключения
-    const socket = io.connect();
-    const $user = 'username';
+    let username = '';
+    const socket = io.connect({
+      query: {
+        token: localStorage.getItem('accessToken'),
+      }
+    });
+
+    socket.emit('user.get');
+    socket.on('user.get', (user) => {
+        drawUser(user);
+        username = user.name;
+
+    });
 
     socket.emit('room.get.all');
     socket.on('room.get.all', (rooms) => {
@@ -167,10 +204,36 @@
       if (event.target.id === 'createRoom') {
         const roomName = $('#createRoomName').val()
         socket.emit('room.create', { roomName });
-        $(roomName).val('');
+        $('#createRoomName').val('');
       }
 
-      if (event.target.id !== 'joinRoom' && event.target.id !== 'createRoom') {
+      if (event.target.id === 'changeName') {
+        const newName = $('#newName').val()
+        socket.emit('user.change.name', newName);
+        $('#newName').val('');
+      }
+
+      if (event.target.id === 'changeAvatar') {
+        const data = new FormData();
+        data.append('newAvatar', document.querySelector("#newAvatar").files[0]);
+
+        const config = {
+          method: 'post',
+          url: 'http://localhost:3000/user/newAvatar',
+          headers: {
+            'Authorization': `Bearer ${localStorage.getItem('accessToken')}`,
+            'Content-Type': 'multipart/form-data',
+          },
+          data: data,
+        };
+
+        axios(config)
+          .then((response) => {
+            $(`#avatarPlace`).html(`<img style=" border: 2px solid #212121; border-radius: 50%; display: block; margin-left: auto; margin-right: auto; width: 70px; height: 70px;" id="avatarImg" src="http://localhost:3000${ response.data.newAvatarPath }">`);
+        });
+      }
+
+      if (event.target.id !== 'joinRoom' && event.target.id !== 'createRoom' && event.target.id !== 'changeName' && event.target.id !== 'changeAvatar') {
         const roomName = event.target.id;
         const messageText = $(`#${roomName}Message`).val();
 
@@ -179,17 +242,18 @@
           roomName,
         });
 
-        $(`#${roomName}Messages`).append(`<div class='alert alert-success'><b>${ $user }</b>: ${ messageText }</div>`);
+        $(`#${roomName}Messages`).append(`<div class='alert alert-success'><b>${ username }</b>: ${ messageText }</div>`);
         $(`#${roomName}`).val('');
       }
     })
 
-    $(".container").on('button', (event) => {
-      console.log(event.target);
-    });
-
     socket.on('room.msg', (data) => {
       $(`#${data.roomName}Messages`).append(`<div class='alert alert-warning'><b>${ data.sender }</b>: ${ data.content }</div>`);
+    })
+
+    socket.on('user.change.name', (newName) => {
+      $('#userNamePlace').html(`<p style="font-size: 18pt; text-align: center;">${ newName }</p>`);
+      username = newName;
     })
 
     socket.on('room.create', (newRoom) => {
@@ -200,6 +264,16 @@
     socket.on('room.join', roomName => {
       createRooms([roomName]);
     });
+    function drawUser(user) {
+      $('#profilePlace').append(`
+            <div id="avatarPlace">
+                <img style=" border: 2px solid #212121; border-radius: 50%; display: block; margin-left: auto; margin-right: auto; width: 70px; height: 70px;" id="avatarImg" src="${ user.avatar }">
+            </div>
+            <div id="userNamePlace">
+                <p style="font-size: 18pt; text-align: center;">${ user.name }</p>
+            </div>
+        `);
+    }
 
     function createRooms(rooms) {
       const $tabs = $('#tabs');

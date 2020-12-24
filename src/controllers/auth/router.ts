@@ -21,6 +21,10 @@ export class AuthRouter extends BaseRouter {
 
     router.post(
       '/sign-up',
+      (req, res, next) => {
+        req.body = JSON.parse(req.body.data);
+        return next();
+      },
       this.asyncWrapper(this.authController.signUp),
     );
 

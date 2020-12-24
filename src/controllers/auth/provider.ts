@@ -21,7 +21,7 @@ export class AuthProvider {
     const token = req.headers['x-auth-token'];
     if (token) {
       const user = this.validate(token);
-      if (await this.authService.getRefreshTokenByLogin(user.login) !== null) {
+      if (await this.authService.getRefreshTokenByEmail(user.email) !== null) {
         data._id = user._id;
         data.login = user.login;
       } else {

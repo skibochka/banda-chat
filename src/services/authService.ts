@@ -13,13 +13,14 @@ export class AuthService {
   private redisClient = redisConnection;
 
   public async verifyUser(cred: IUser) {
-    const user = await this.userService.getOne(cred.login);
+    const user = await this.userService.getOne(cred.email);
     const passwordCompared = await bcrypt.compare(cred.password, user.password);
 
     if (passwordCompared) {
       return {
         _id: user._id,
-        login: user.login,
+        name: user.name,
+        email: user.email,
       };
     }
 
@@ -27,20 +28,15 @@ export class AuthService {
   }
 
   public async login(user: IUser) {
-    const payload = {
-      _id: user._id,
-      login: user.login,
-    };
-
-    const accessToken = this.jwtService.sign(payload, authConstants.secret, {
+    const accessToken = this.jwtService.sign(user, authConstants.secret, {
       expiresIn: authConstants.expirationTime.jwt.default.accessToken,
     });
-    const refreshToken = this.jwtService.sign(payload, authConstants.secret, {
+    const refreshToken = this.jwtService.sign(user, authConstants.secret, {
       expiresIn: authConstants.expirationTime.jwt.default.refreshToken,
     });
 
     await this.redisClient.set(
-      payload.login,
+      user.email,
       refreshToken,
       'EX',
       authConstants.expirationTime.redis.default.refreshToken,
@@ -52,12 +48,12 @@ export class AuthService {
     };
   }
 
-  public getRefreshTokenByLogin(login: string): Promise<string | null> {
-    return this.redisClient.get(login);
+  public getRefreshTokenByEmail(email: string): Promise<string | null> {
+    return this.redisClient.get(email);
   }
 
-  public deleteTokenByLogin(login: string): Promise<number> {
-    return this.redisClient.del(login);
+  public deleteTokenByEmail(email: string): Promise<number> {
+    return this.redisClient.del(email);
   }
 
   public deleteAllTokens(): Promise<string> {
